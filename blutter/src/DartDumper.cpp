@@ -128,16 +128,6 @@ void DartDumper::Dump4Ida(std::filesystem::path outDir)
 import idaapi
 import os
 
-dart_object_pool_struc = None
-
-def ida_set_member_cmt(sid, member_offset, comment, repeatable):
-	if idaapi.IDA_SDK_VERSION <= 700:
-		if dart_object_pool_struc is None:
-			dart_object_pool_struc = ida_struct.get_struc(sid)
-		return ida_struct.set_member_cmt(ida_struct.get_member(dart_object_pool_struc, member_offset), comment, repeatable)
-	else:
-		return idc.set_member_cmt(sid, member_offset, comment, repeatable)
-
 def create_Dart_structs():
 	sid1 = idc.get_struc_id("DartThread")
 	if sid1 != idc.BADADDR:
@@ -148,7 +138,7 @@ def create_Dart_structs():
 	sid2 = idc.import_type(-1, "DartObjectPool")
 )CBLOCK";
 	for (const auto& [offset, comment] : comments) {
-		of << "\tida_set_member_cmt(sid2, " << offset << ", '''" << comment << "''', True)\n";
+		of << "\tidc.set_member_cmt(sid2, " << offset << ", '''" << comment << "''', True)\n";
 	}
 	of << "\treturn sid1, sid2\n";
 	of << "thrs, pps = create_Dart_structs()\n";
